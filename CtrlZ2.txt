@@ -1,0 +1,52 @@
+change text => bắt sự kiện => add vô history
+undo/redo text cũng là change text => không được add vô stack trace
+
+giống như có con trỏ chạy dùng để đánh index text hiện tại của view's id
+nếu như 1 text mới được thêm vô => index = textholder(size - 1)
+nếu như ctrlz =>
+	- Kiểm tra index tồn tại hay không
+	- getText và gán cho view => sẽ bị trường hợp loop => get text vừa mới ctrlz lại để gán vô mảng holder => LÀM SAO BIẾT ĐƯỢC ĐÓ LÀ CHUỖI MÌNH UNDO/REDO MÀ KHÔNG PHẢI LÀ TEXT CHANGE BÌNH THƯỜNG???
+Nhận ra 1 điều nếu text mói thêm vô thì index hiện tại của textholder của view đó sẽ ở vị trí cuối cùng => thế nếu nó move từ trị trí nào đó sang vị trí cuối ???
+
+=> Cần phải phân biệt được đâu là undo/redo *đang suy nghĩ*
+
+Để biết được cần phải undo/redo cho view nào => cần phải biết được cách nào xác nhận view đó => bằng Id => làm sao biết được dang focus vô id nào => bắt thêm sự kiện focus_view 
+
+các sự kiện cần phải bắt: text_changed, window_changed, focused_view
+focused_view: có thể nhiều view khác nhau, nhưng không chắc là input nhập liệu vô (1)
+window_changed: tác dụng trên máy, mục đích dùng trong project là phân biệt được khi nào keyboard hiện lên hay không (2)
+text_changed: bắt tất cả sự hiện text_changed trên máy (3)
+=> thứ tự ưu tiên phải là: window_changed => focused_view => text_changed
+Từ (1) + (2) => chỉ bắt (focused_view) view's id của view nào đang có input = show  
+
+Khi window_changed: kiểm tra xem có phải input đang được hiện lên hay không
+Khi focus_view: kiểm tra xem có phải input đang hiện lên không (mIsKeyboardDisplayed == true?) nếu có thì set mFocusId = giá trị của view's id đó
+Khi text_changed: kiểm tra xem text_changed là loại nào?
+	1. Nếu như TEXT_CHANGED_TYPE = NORMAL (text changed bình thường) 
+		call addText
+	2. Nếu như TEXT_CHANGED_TYPE != NORMAL
+		2.1 Nếu như TEXT_CHANGED_TYPE == UNDO
+			call addTextUndo
+		2.2 Nếu như TEXT_CHANGED_TYPE == REDO
+			call addTextRedo
+			
+
+function addText(...)
+{
+	deleteKilledApp(...);
+	addText(...)
+}
+
+function addTextUndo(...)
+{
+	set AccessService.mCursor = vị trí cần undo
+	set AccessService.TEXT_CHANGED_TYPE = AccessService.UNDO
+	call addTextNormal
+}
+
+function addTextRedo(...)
+{	
+	set AccessService.mCursor = vị trí cần redo
+	set AccessService.TEXT_CHANGED_TYPE = AccessService.REDO
+	call addTextNormal
+}

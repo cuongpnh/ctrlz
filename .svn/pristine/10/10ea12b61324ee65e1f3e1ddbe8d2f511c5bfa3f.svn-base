@@ -1,0 +1,164 @@
+package com.ceofox.mobile.ctrlz.service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.view.accessibility.AccessibilityEvent;
+import android.widget.Toast;
+
+import com.ceofox.mobile.ctrlz.model.TextHolder;
+import com.ceofox.mobile.ctrlz.model.ZHolder;
+import com.ceofox.mobile.ctrlz.util.Utils;
+
+public class KeyboardAccessibilityService extends AccessibilityService {
+	private boolean mIsKeyboardDisplayed = false;
+	private boolean mIsInit = false;
+	private AccessibilityServiceInfo mInfo = null;
+	private Util mUtil = null;
+	private ArrayList<ZHolder> mZHolder = null;
+	private ArrayList<String> mPackageNameHolder = null;
+	private int mNotificationTimeout = 300;
+	public static boolean DEBUG = false;
+
+	@Override
+	public void onAccessibilityEvent(AccessibilityEvent event) {
+
+		if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+			String packageName = mUtil.getInputPackageName();
+			int pid = mUtil.getPIDByPackageName(packageName);
+			boolean isKeyboardDisplayed = mUtil.readVisibleState(pid);
+
+			if (isKeyboardDisplayed != mIsKeyboardDisplayed) {
+				String message = "Keyboard";
+				mIsKeyboardDisplayed = isKeyboardDisplayed;
+				Toast.makeText(
+						getApplicationContext(),
+						(isKeyboardDisplayed) ? message + " Visible" : message
+								+ " Invisible", Toast.LENGTH_SHORT).show();
+			}
+
+		} else if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+
+			/*
+			 * Delete killed application here!
+			 */
+			deleteKilledApp(mUtil.getRunningPackage());
+
+			if (event.getSource() != null) {
+				if (DEBUG) {
+					StringBuilder stringBuilder = new StringBuilder();
+					String id = String.valueOf(event.getSource().hashCode());
+					String currentText = event.getText().toString();
+					String beforeText = event.getBeforeText().toString();
+					stringBuilder.append(" [ Id: " + id);
+					stringBuilder.append("; currentText: " + currentText);
+					stringBuilder.append("; beforeText: " + beforeText);
+					stringBuilder.append("; packageName: "
+							+ event.getPackageName());
+					stringBuilder
+							.append("; className: " + event.getClassName());
+					stringBuilder.append(" ]");
+					Toast.makeText(getApplicationContext(),
+							stringBuilder.toString(), 5000).show();
+				}
+				if (!event.getSource().isPassword()) {
+					addText(event.getPackageName().toString(), event
+							.getSource().hashCode(),
+							event.getText().toString(), event.getBeforeText()
+									.toString());
+					Toast.makeText(getApplicationContext(),
+							mZHolder.toString(), 5000).show();
+				}
+
+			}
+
+		}
+
+	}
+
+	@Override
+	public void onInterrupt() {
+		System.out.print("onInterrupt");
+		mIsInit = false;
+	}
+
+	@Override
+	protected void onServiceConnected() {
+		if (mIsInit) {
+			return;
+		}
+		mInfo = new AccessibilityServiceInfo();
+		mInfo.eventTypes = AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
+				| AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED;
+		mInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
+		mInfo.notificationTimeout = mNotificationTimeout;
+		setServiceInfo(mInfo);
+		init();
+		mIsInit = true;
+	}
+
+	public void init() {
+		mZHolder = new ArrayList<ZHolder>();
+		mUtil = new Util(getApplicationContext());
+		mPackageNameHolder = new ArrayList<String>();
+	}
+
+	private void deleteKilledApp(ArrayList<String> runningPackage) {
+		if (mZHolder.size() > 0) {
+			ArrayList<ZHolder> tmpHolder = new ArrayList<ZHolder>();
+			ArrayList<String> tmpPackgeNameHolder = new ArrayList<String>();
+			for (int i = 0; i < mZHolder.size(); i++) {
+				if (!runningPackage.contains(mZHolder.get(i).getName())) {
+					tmpHolder.add(mZHolder.get(i));
+					tmpPackgeNameHolder.add(mPackageNameHolder.get(i));
+				}
+			}
+			if (tmpHolder.size() > 0) {
+				mZHolder.remove(tmpHolder);
+				mPackageNameHolder.remove(tmpPackgeNameHolder);
+			}
+		}
+	}
+
+	private void addText(String name, int id, String currentText,
+			String beforeText) {
+		/*
+		 * Checking package exists
+		 */
+		if (!mPackageNameHolder.contains(name)) {
+			/*
+			 * Package name is not exists
+			 */
+			mPackageNameHolder.add(name);
+			ArrayList<String> childTextHolder = new ArrayList<String>(
+					Arrays.asList(beforeText, currentText));
+			TextHolder textHolder = new TextHolder(id, childTextHolder);
+			ArrayList<TextHolder> textHolderList = new ArrayList<TextHolder>();
+			textHolderList.add(textHolder);
+			mZHolder.add(new ZHolder(name, textHolderList));
+
+		} else {
+			/*
+			 * Checking view's id exists
+			 */
+			ZHolder holder = ZHolder.getTextHolderByName(mZHolder, name);
+			int idIndex = ZHolder.isViewIdExists(holder, id);
+			if (idIndex > -1) {
+				/*
+				 * Exists
+				 */
+				holder.getTextHolder().get(idIndex).getText().add(currentText);
+			} else {
+				/*
+				 * Not exists
+				 */
+				TextHolder textHolder = new TextHolder(id,
+						new ArrayList<String>(Arrays.asList(beforeText,
+								currentText)));
+				holder.getTextHolder().add(textHolder);
+			}
+		}
+	}
+}

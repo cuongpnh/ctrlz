@@ -1,0 +1,75 @@
+package com.ceofox.mobile.ctrlz.service;
+
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.view.accessibility.AccessibilityEvent;
+import android.widget.Toast;
+
+import com.ceofox.mobile.ctrlz.util.Utils;
+
+public class KeyboardAccessibilityService extends AccessibilityService {
+	private boolean mIsKeyboardDisplayed = false;
+	private boolean mIsInit = false;
+	private AccessibilityServiceInfo mInfo = null;
+
+	@Override
+	public void onAccessibilityEvent(AccessibilityEvent event) {
+
+		if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+			Util util = new Util(getApplicationContext());
+			String packageName = util.getInputPackageName();
+			int pid = util.getPIDByPackageName(packageName);
+			boolean isKeyboardDisplayed = util.readVisibleState(pid);
+
+			if (isKeyboardDisplayed != mIsKeyboardDisplayed) {
+				String message = "Keyboard";
+				mIsKeyboardDisplayed = isKeyboardDisplayed;
+				Toast.makeText(
+						getApplicationContext(),
+						(isKeyboardDisplayed) ? message + " Visible" : message
+								+ " Invisible", Toast.LENGTH_SHORT).show();
+			}
+
+		} else if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+
+			if (event.getSource() != null) {
+				StringBuilder stringBuilder = new StringBuilder();
+				String id = String.valueOf(event.getSource().hashCode());
+				String currentText = event.getText().toString();
+				String beforeText = event.getBeforeText().toString();
+				stringBuilder.append(" [ Id: " + id);
+				stringBuilder.append("; currentText: " + currentText);
+				stringBuilder.append("; beforeText: " + beforeText);
+				stringBuilder.append("; packageName: " + event.getPackageName());
+				stringBuilder.append("; className: " + event.getClassName());
+				stringBuilder.append(" ]");
+
+				Toast.makeText(getApplicationContext(), stringBuilder.toString(), 5000).show();
+			}
+
+		}
+
+	}
+
+	@Override
+	public void onInterrupt() {
+		System.out.print("onInterrupt");
+		mIsInit = false;
+	}
+
+	@Override
+	protected void onServiceConnected() {
+		if (mIsInit) {
+			return;
+		}
+		mInfo = new AccessibilityServiceInfo();
+		mInfo.eventTypes = AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
+				| AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED;
+		mInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
+		mInfo.notificationTimeout = 100;
+		setServiceInfo(mInfo);
+		mIsInit = true;
+
+	}
+
+}

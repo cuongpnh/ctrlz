@@ -1,0 +1,37 @@
+window thay đổi => biết được khi nào bàn phím sẽ hiện/ẩn. Mà hiện ẩn dùng để mần gì? => ẩn hiện nút redo/undo? Nhưng nếu như chưa có thay đổi test thì hiện mần gì??? (1) => có thể bỏ qua sự kiện window thay đổi
+
+Sự kiện text changed => biết được text trước khi change (quá good luôn), nó change thì chưa chắc là đang có bàn phím input hiện ra. Vd: paste content. Nhưng nếu như đã có thay đổi thì phải hiện ctrlz ra
+ 
+
+packageName = array
+	1823 => array
+		0 => text
+		1 => text a
+		2 => text ab
+		3 => texsss
+	823 => array
+		0 => text
+		1 => text a
+		2 => text ab
+		3 => texsss
+Zholder
+String name;
+ArrayList<TextHolder>
+TextHolder
+int id
+ArrayList<String>
+
+- Service trên luôn chạy => không có mở lại => không thể clear hết những text cũ đi để add mới vô => Không khả thi khi clear hết những text cũ => BỎ
+		...
+=> Id thay đổi theo mỗi lần chạy lại ứng dung => muốn có id mới thì cần phải destroy activity cũ đi => Activity đã bị destroy thì cần phải clear luôn mảng ctrlz của element đó => làm sao biết được khi nào activity đó destroy => process list => 2 cách sử lý
+	1. Nếu như không xóa text cũ đi => 
+		- Tốn nhiều bộ nhớ để lưu
+		- Nếu lỡ như ID trùng => Chết
+		=> BỎ
+	2. Lắng nghe process nào chết thì kiểm tra xem có tồn tại process đó trong list không? Nếu có thì xóa nó đi => khả thi
+	2b. Không lắng nghe trên process mà lắng nghe trên activity, có khả thi? => (Hiện tại) không thể lắng nghe sự kiện activity destroy => BỎ
+	
+		
+=> 
+
+QUẢN LÝ CONTENT BẰNG PROCESS NHƯNG KHI THIẾU RAM THÌ SYSTEM TỰ ĐỘNG KILL PROCESS => PROCESS CHẾT THÌ KHÔNG BIẾT ĐƯỢC ID CỦA VIEW => CTRLZ KHÔNG CÒN Ý NGHĨA => 

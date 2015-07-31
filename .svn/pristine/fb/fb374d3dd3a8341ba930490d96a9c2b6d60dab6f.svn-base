@@ -1,0 +1,75 @@
+package com.ceofox.mobile.ctrlz.service;
+
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Toast;
+
+import com.ceofox.mobile.ctrlz.util.Utils;
+
+public class KeyboardAccessibilityService extends AccessibilityService {
+	private boolean mIsKeyboardDisplayed = false;
+	private boolean mIsInit = false;
+	private AccessibilityServiceInfo mInfo = null;
+
+	@Override
+	public void onAccessibilityEvent(AccessibilityEvent event) {
+		
+		if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+			Util util = new Util(getApplicationContext());
+			String packageName = util.getInputPackageName();
+			int pid = util.getPIDByPackageName(packageName);
+			boolean isKeyboardDisplayed = util.readVisibleState(pid);
+
+			if (isKeyboardDisplayed != mIsKeyboardDisplayed) {
+				String message = "Keyboard";
+				mIsKeyboardDisplayed = isKeyboardDisplayed;
+				Toast.makeText(
+						getApplicationContext(),
+						(isKeyboardDisplayed) ? message + " Visible" : message
+								+ " Invisible", Toast.LENGTH_SHORT).show();
+			}
+
+		} else if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+			
+			
+			Toast.makeText(getApplicationContext(), mInfo.toString(), 5000).show();
+			
+			
+			
+			//if(event.getSource() != null)
+			{
+				//event.getWindowId()
+				//String message = event.getSource().getViewIdResourceName().toString();
+				//String message  = event.getText().toString();
+				String message  = event.toString();
+				Toast.makeText(getApplicationContext(), message, 5000).show();
+			}
+
+		}
+
+	}
+
+	@Override
+	public void onInterrupt() {
+		System.out.print("onInterrupt");
+		mIsInit = false;
+	}
+
+	@Override
+	protected void onServiceConnected() {
+		if (mIsInit) {
+	        return;
+	    }
+		mInfo = new AccessibilityServiceInfo();
+		mInfo.eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+				| AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
+		mInfo.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
+		mInfo.notificationTimeout = 100;
+		setServiceInfo(mInfo);
+		mIsInit = true;
+
+	}
+
+}

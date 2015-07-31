@@ -1,0 +1,49 @@
+package com.ceofox.mobile.ctrlz.model;
+
+import java.util.ArrayList;
+
+public class TextHolder {
+	private int id;
+	private ArrayList<String> text;
+	public TextHolder(int id, ArrayList<String> text)
+	{
+		this.id = id;
+		this.text = text;
+	}
+	public ArrayList<String> getText() {
+		return text;
+	}
+
+	public void setText(ArrayList<String> text) {
+		this.text = text;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append(" [ Id: " + this.id);
+        builder.append("; Text: "  + text.toString());
+        builder.append(" ]");
+        return builder.toString();
+		
+	}
+	
+	public String childToString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("; Text: [");
+        builder.append(text.toString());
+        builder.append("]");
+        return builder.toString();
+		
+	}
+}

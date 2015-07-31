@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">CtrlZ</string>
+    <string name="checked">Checked</string>
+    <string name="not_checked">Not checked</string>
+    <string name="task_complete">Task complete</string>
+    <string name="task_not_complete">Task not complete</string>
+    <string name="task_complete_template">task_complete_template</string>
+    
+
+</resources>

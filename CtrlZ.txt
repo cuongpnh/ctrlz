@@ -1,0 +1,42 @@
+* Phân tích theo hướng người dùng:
+- Làm bàn phím ảo với tính năng undo/redo text
+- Sử dụng tốt với các input text, textarea (không dùng được với cái input là password)
+- Với những vùng có nhiều input => phải phân biệt được những element
+- Cho phép tùy chỉnh số lượng undo/redo và xem được history
+	+ Giới hạn số lần undo/redo
+	
+* Phân tích theo hướng lập trình viên:
+- Set timeout để tracking lại các trạng thái?
+	+ Bao nhiêu là đủ?
+	+ Có cho phép người dùng chỉnh trong setting?
+- Giới hạn undo/redo bao nhiêu là đủ (default) ? => 100 và cho phép người dùng thay đổi. Min cho người dùng nhập vào sẽ là 10.
+- Bằng cách nào để có thể hook vô được sự kiện input text?
+- Ẩn 3 button undo/redo/history khi người dùng gõ và hiện lại sau khi ngừng gõ?
+- Làm sao để có thể thêm 3 button trên lên màn hình của device => bắt sự kiện user input
+- Hiện 3 button ở đâu? 
+	+ Trên màn hình nhập text của người dùng?
+	+ Hay sẽ được cố định ở trên keyboard?
+- Giống như có 1 con trỏ chạy lên xuống trong mảng undo/redo, ứng với vị trí hiện tại của con trỏ là giá trị value của input đó
+- 	
+abc
+def
+ghi
+
+0, abc
+1, abc
+def
+2, abc
+def
+ghi
+
+
+
+aydsgsjfsdkg
+
+0 aydsgsjfsdkg + 29487y2384
+1 aydsgsjfsdkg + 29487y2384
+2 aydsgsjfsdkg + 29487y2384
+3 aydsgsjfsdkg + 29487y2384
+4 aydsgsjfsdkg + 29487y2384
+
+cursor
